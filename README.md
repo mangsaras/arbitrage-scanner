@@ -3,5 +3,14 @@
 Arbitrage atau arbitrase adalah sebuah strategi trading untuk mencari keuntungan dengan memanfaatkan perbedaan harga suatu aset yang muncul di antara beberapa market atau pasar
 
 Arbitrage bisa dilakukan pada berbagai instrumen keuangan selain saham seperti obligasi, derivatif, komoditas, dan juga mata uang
-![image](https://user-images.githubusercontent.com/91316627/175954362-86f93369-c506-457b-b0d3-e1ea18b96cd8.png)
 
+Fitur :
+->Show Monitored Market (menampilkan daftar market crypto yang di pantau oleh program)
+->Setup Favorite Coin (menampilkan daftar coin favorit)
+->Setup Program (
+  --> Setup Auto Refresh Scanner (in Minutes) (konfigurasi terkait delay time program dalam memantau market)
+  --> Setup Auto Write File (Y/N) (jik y-> maka setiap menu 'View Scanner diakses program auto mencatat hasil scan ke file dengan nama file tgl sistem')
+->View Scanner
+  --> View Favorite Coin (menampilkan data market khusus coin favorit)
+  --> View Single Coin (menampilkan data coin sesuai inputan user)
+  
