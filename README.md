@@ -1,4 +1,4 @@
-# arbitrage-scanner
+# Arbitrage Scanner
 
 Arbitrage atau arbitrase adalah sebuah strategi trading untuk mencari keuntungan dengan memanfaatkan perbedaan harga suatu aset yang muncul di antara beberapa market atau pasar
 
