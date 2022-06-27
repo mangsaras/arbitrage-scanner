@@ -4,7 +4,7 @@ Arbitrage atau arbitrase adalah sebuah strategi trading untuk mencari keunt
 
 Arbitrage bisa dilakukan pada berbagai instrumen keuangan selain saham seperti obligasi, derivatif, komoditas, dan juga mata uang
 
-Fitur :
+# Fitur :
 *Show Monitored Market (menampilkan daftar market crypto yang di pantau oleh program)
 *Setup Favorite Coin (menampilkan daftar coin favorit)
 *Setup Program (
