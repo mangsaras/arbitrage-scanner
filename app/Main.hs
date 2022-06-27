@@ -10,11 +10,11 @@ prompt text = do
 
 runProgram messages = do
     putStrLn "\n\n\n=============== Crypto Arbitrage Scanner  ==============="
-    putStrLn "       (a) Show all exchange"
-    putStrLn "       (b) Setup favorite coin"
-    putStrLn "       (c) Setup program"
+    putStrLn "       (a) Show Monitored Market"
+    putStrLn "       (b) Setup Favorite Coin"
+    putStrLn "       (c) Setup Program"
     putStrLn "       (d) View Scanner"
-    putStrLn "       (e) Exit program"
+    putStrLn "       (e) Exit Program"
     putStrLn "========================================================="
     choice <- prompt "Input choice: "
     case choice of
