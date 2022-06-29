@@ -3,7 +3,7 @@ module Main where
 import System.IO (hFlush, stdout)
 import Model.Market (Market (Unknown), idMarket, marketName, apiUrl, description, showAllMarket, parseData)
 import Model.FavoriteCoin (FavoriteCoin (Unknown), idCoin, coin, pair, showAllFavoriteCoin, parseDataCoin, addNewFavCoin, saveToFileFavCoin, updateFavCoin, removeFavCoin)
-import Model.CoinPrice (CoinPrice (Unknown), coinPair, price, parseCoinPrice, showAllCoinPrice, getPrice)
+import Model.CoinPrice (CoinPrice (UnknownCoin), coinPair, price, parseCoinPrice, showAllCoinPrice, getPrice, scannerPrice, scannerPriceAllFavCoin)
 import Library.Common (MaybeT, liftMaybeT, maybeReadInt, runMaybeT)
 import Text.Printf
 
@@ -103,43 +103,15 @@ scannerMenu = do
     case choiceScanMenu of 
         "a" -> do
             coinPair <- prompt "Coin/Pair : "
-
-            binance <- fmap parseCoinPrice (readFile "app/Data/Binance.txt")
-            ftx <- fmap parseCoinPrice (readFile "app/Data/FTX.txt")
-            kucoin <- fmap parseCoinPrice (readFile "app/Data/Kucoin.txt")
-            
-            priceBinance <- getPrice binance coinPair
-            priceFTX <- getPrice ftx coinPair
-            priceKucoin <- getPrice kucoin coinPair
-
-            let binanceDouble = read priceBinance :: Double 
-            let ftxDouble = read priceFTX :: Double 
-            let kucoinDouble = read priceKucoin :: Double 
-
-            let diffBinanceFtx = ((ftxDouble-binanceDouble)/binanceDouble)*100
-            let diffBinanceKucoin = ((kucoinDouble-binanceDouble)/binanceDouble)*100
-            let diffFtxBinance = ((binanceDouble-ftxDouble)/ftxDouble)*100
-            let diffFtxKucoin = ((kucoinDouble-ftxDouble)/ftxDouble)*100
-            let diffKucoinBinance = ((binanceDouble-kucoinDouble)/kucoinDouble)*100
-            let diffKucoinFTX = ((ftxDouble-kucoinDouble)/kucoinDouble)*100
-
-            putStrLn "========================================================="
-            putStrLn ("Coin/Pair : " ++ coinPair)
-            putStrLn ("Binance Price : " ++ priceBinance)
-            putStrLn ("FTX Price : " ++ priceFTX)
-            putStrLn ("Kucoin Price : " ++ priceKucoin)
-            putStrLn (replicate 29 '-')
-            printf "Binance -> FTX : %.2f%%" diffBinanceFtx
-            printf "\nBinance -> Kucoin : %.2f%%" diffBinanceKucoin
-            printf "\nFTX -> Binance : %.2f%%" diffFtxBinance
-            printf "\nFTX -> Kucoin : %.2f%%" diffFtxKucoin
-            printf "\nKucoin -> Binance : %.2f%%" diffKucoinBinance
-            printf "\nKucoin -> FTX : %.2f%%" diffKucoinFTX
-            putStrLn "\n========================================================="
+            tempResult <- scannerPrice coinPair
+            putStrLn tempResult
             empty <- prompt "Press enter to go back"
             scannerMenu
         "b" -> do
-            mainMenu
+            favoriteCoins <- fmap parseDataCoin (readFile "app/Data/FavoriteCoin.txt")
+            putStrLn $ scannerPriceAllFavCoin favoriteCoins
+            empty <- prompt "Press enter to go back"
+            scannerMenu
         "d" -> do
             mainMenu
         _ -> do
