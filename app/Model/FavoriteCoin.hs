@@ -56,6 +56,31 @@ addNewFavCoin oldListData coin pair = do
     let newListData = oldListData ++ [newFavCoin]
     return newListData
 
+updateFavCoin :: [FavoriteCoin] -> Int -> String -> String -> IO [FavoriteCoin]
+updateFavCoin listData choice coin pair = do
+    let dataExist = find (\item -> (idCoin item) == choice) listData
+
+        extractData :: Maybe FavoriteCoin -> FavoriteCoin
+        extractData (Just a) = a
+        extractData Nothing = Unknown
+
+        updateData :: [FavoriteCoin] -> FavoriteCoin -> String -> String -> [FavoriteCoin]
+        updateData [] chosenItem coin pair = []
+        updateData (favoriteCoin : favoriteCoins) chosenItem coin pair
+            | favoriteCoin == chosenItem = [favoriteCoin{coin = coin, pair = pair}] ++ updateData favoriteCoins chosenItem coin pair
+            | otherwise = [favoriteCoin] ++ updateData favoriteCoins chosenItem coin pair
+
+    let newList =
+            if (extractData dataExist) == Unknown
+                then listData
+                else updateData listData (extractData dataExist) coin pair
+
+    if (extractData dataExist) == Unknown
+        then putStrLn "Data not found. Please check your Coin ID"
+        else putStrLn "Successfully Updaate Favorite Coin !"
+
+    return newList
+
 removeFavCoin :: [FavoriteCoin] -> Int -> IO [FavoriteCoin]
 removeFavCoin listData choice = do
     let dataExist = find (\item -> (idCoin item) == choice) listData
