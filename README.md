@@ -7,8 +7,9 @@ Arbitrage bisa dilakukan pada berbagai instrumen keuangan selain saham seperti o
 # Fitur :
 * Show Monitored Market (menampilkan daftar market crypto yang di pantau oleh program)
 * Setup Favorite Coin (menampilkan daftar coin favorit)
-  * Add Coin
-  * Delete Coin
+  * Add Favorite Coin
+  * Update Favorite Coin
+  * Delete Favorite Coin
 * Setup Program (
   * Setup Auto Refresh Scanner (in Minutes) (konfigurasi terkait delay time program dalam memantau market)
   * Setup Auto Write File (Y/N) (jik y-> maka setiap menu 'View Scanner diakses program auto mencatat hasil scan ke file dengan nama file tgl sistem')
