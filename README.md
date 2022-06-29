@@ -10,10 +10,7 @@ Arbitrage bisa dilakukan pada berbagai instrumen keuangan selain saham seperti o
   * Add Favorite Coin
   * Update Favorite Coin
   * Delete Favorite Coin
-* Setup Program (
-  * Setup Auto Refresh Scanner (in Minutes) (konfigurasi terkait delay time program dalam memantau market)
-  * Setup Auto Write File (Y/N) (jik y-> maka setiap menu 'View Scanner diakses program auto mencatat hasil scan ke file dengan nama file tgl sistem')
 * View Scanner
-  * View Favorite Coin (menampilkan data market khusus coin favorit)
-  * View Single Coin (menampilkan data coin sesuai inputan user)
+  * Scan Based on Favorite Coin (menampilkan data market khusus coin favorit)
+  * Input Coin (menampilkan data coin sesuai inputan user)
   
