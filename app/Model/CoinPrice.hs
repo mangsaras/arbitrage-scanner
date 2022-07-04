@@ -1,8 +1,15 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Model.CoinPrice where
 
-import Data.List
-import Text.Printf
+import Data.List ( find )
+import Text.Printf ( printf )
 import Model.FavoriteCoin (FavoriteCoin (Unknown), idCoin, coin, pair, parseDataCoin)
+import Network.Wreq
+import Control.Lens
+import Data.Aeson.Lens (_String, key)
+import Data.Char
+import qualified Data.Text as T     
 
 data CoinPrice
     = CoinPrice
@@ -41,7 +48,7 @@ showAllCoinPrice (coinPrice : coinPrices) =
 
 getPrice :: [CoinPrice] -> String -> IO String
 getPrice listData choice = do
-    let dataExist = find (\item -> (coinPair item) == choice) listData
+    let dataExist = find (\item -> coinPair item == choice) listData
 
         extractData :: Maybe CoinPrice -> CoinPrice
         extractData (Just a) = a
@@ -50,56 +57,124 @@ getPrice listData choice = do
         getData :: [CoinPrice] -> CoinPrice -> String
         getData [] chosenItem  = "0"
         getData (coinPrice : coinPrices) chosenItem
-            | coinPrice == chosenItem = (price coinPrice)
+            | coinPrice == chosenItem = price coinPrice
             | otherwise = getData coinPrices chosenItem
 
     let tempPrice =
-            if (extractData dataExist) == UnknownCoin
+            if extractData dataExist == UnknownCoin
                 then "0"
                 else getData listData (extractData dataExist)
 
     return tempPrice
 
-scannerPrice :: String -> IO String
-scannerPrice coinPair = do
-    binance <- fmap parseCoinPrice (readFile "app/Data/Binance.txt")
-    ftx <- fmap parseCoinPrice (readFile "app/Data/FTX.txt")
-    kucoin <- fmap parseCoinPrice (readFile "app/Data/Kucoin.txt")
+scannerPriceOffline :: String -> String -> IO String
+scannerPriceOffline coin pair = do
     
+    binance <- fmap parseCoinPrice (readFile "app/Data/Binance.txt")
+    indodax <- fmap parseCoinPrice (readFile "app/Data/Indodax.txt")
+    kucoin <- fmap parseCoinPrice (readFile "app/Data/Kucoin.txt")
+
+    let coinPair = coin ++ "/" ++ pair
     priceBinance <- getPrice binance coinPair
-    priceFTX <- getPrice ftx coinPair
+    priceIndodax <- getPrice indodax coinPair
     priceKucoin <- getPrice kucoin coinPair
 
-    let binanceDouble = read priceBinance :: Double 
-    let ftxDouble = read priceFTX :: Double 
-    let kucoinDouble = read priceKucoin :: Double 
+    let binanceDouble = read priceBinance :: Double
+    let indodaxDouble = read priceIndodax :: Double
+    let kucoinDouble = read priceKucoin :: Double
 
-    let diffBinanceFtx = ((ftxDouble-binanceDouble)/binanceDouble)*100
+    let diffBinanceIndodax = ((indodaxDouble-binanceDouble)/binanceDouble)*100
     let diffBinanceKucoin = ((kucoinDouble-binanceDouble)/binanceDouble)*100
-    let diffFtxBinance = ((binanceDouble-ftxDouble)/ftxDouble)*100
-    let diffFtxKucoin = ((kucoinDouble-ftxDouble)/ftxDouble)*100
+    let diffIndodaxBinance = ((binanceDouble-indodaxDouble)/indodaxDouble)*100
+    let diffIndodaxKucoin = ((kucoinDouble-indodaxDouble)/indodaxDouble)*100
     let diffKucoinBinance = ((binanceDouble-kucoinDouble)/kucoinDouble)*100
-    let diffKucoinFTX = ((ftxDouble-kucoinDouble)/kucoinDouble)*100
+    let diffKucoinIndodax = ((indodaxDouble-kucoinDouble)/kucoinDouble)*100
 
-    let result = "=========================================================" 
+    let result = "\n========================================================="
                 ++ "\nCoin/Pair : " ++ coinPair
                 ++ ("\nBinance Price : " ++ priceBinance)
-                ++ ("\nFTX Price : " ++ priceFTX)
+                ++ ("\nIndodax Price : " ++ priceIndodax)
                 ++ ("\nKucoin Price : " ++ priceKucoin)
                 ++ ("\n" ++ replicate 29 '-')
-                ++ printf "\nBinance -> FTX : %.2f%%" diffBinanceFtx
+                ++ printf "\nBinance -> Indodax : %.2f%%" diffBinanceIndodax
                 ++ printf "\nBinance -> Kucoin : %.2f%%" diffBinanceKucoin
-                ++ printf "\nFTX -> Binance : %.2f%%" diffFtxBinance
-                ++ printf "\nFTX -> Kucoin : %.2f%%" diffFtxKucoin
+                ++ printf "\nIndodax -> Binance : %.2f%%" diffIndodaxBinance
+                ++ printf "\nIndodax -> Kucoin : %.2f%%" diffIndodaxKucoin
                 ++ printf "\nKucoin -> Binance : %.2f%%" diffKucoinBinance
-                ++ printf "\nKucoin -> FTX : %.2f%%" diffKucoinFTX
+                ++ printf "\nKucoin -> Indodax : %.2f%%" diffKucoinIndodax
+                ++ "\n========================================================="
+
+    return result
+
+scannerPrice :: String -> String -> IO String
+scannerPrice coin pair = do
+    
+    let coinPair = coin ++ "/" ++ pair
+    
+    priceBinance <- getBinancePrice coin pair
+    priceIndodax <- getIndodaxPrice coin pair
+    priceKucoin <- getKucoinPrice coin pair
+
+    let binanceDouble = read priceBinance :: Double
+    let indodaxDouble = read priceIndodax :: Double
+    let kucoinDouble = read priceKucoin :: Double
+
+    let diffBinanceIndodax = ((indodaxDouble-binanceDouble)/binanceDouble)*100
+    let diffBinanceKucoin = ((kucoinDouble-binanceDouble)/binanceDouble)*100
+    let diffIndodaxBinance = ((binanceDouble-indodaxDouble)/indodaxDouble)*100
+    let diffIndodaxKucoin = ((kucoinDouble-indodaxDouble)/indodaxDouble)*100
+    let diffKucoinBinance = ((binanceDouble-kucoinDouble)/kucoinDouble)*100
+    let diffKucoinIndodax = ((indodaxDouble-kucoinDouble)/kucoinDouble)*100
+
+    let result = "\n========================================================="
+                ++ "\nCoin/Pair : " ++ coinPair
+                ++ ("\nBinance Price : " ++ priceBinance)
+                ++ ("\nIndodax Price : " ++ priceIndodax)
+                ++ ("\nKucoin Price : " ++ priceKucoin)
+                ++ ("\n" ++ replicate 29 '-')
+                ++ printf "\nBinance -> Indodax : %.2f%%" diffBinanceIndodax
+                ++ printf "\nBinance -> Kucoin : %.2f%%" diffBinanceKucoin
+                ++ printf "\nIndodax -> Binance : %.2f%%" diffIndodaxBinance
+                ++ printf "\nIndodax -> Kucoin : %.2f%%" diffIndodaxKucoin
+                ++ printf "\nKucoin -> Binance : %.2f%%" diffKucoinBinance
+                ++ printf "\nKucoin -> Indodax : %.2f%%" diffKucoinIndodax
                 ++ "\n========================================================="
 
     return result
 
 
-scannerPriceAllFavCoin [] = replicate 58 '='
-scannerPriceAllFavCoin (favoriteCoin : favoriteCoins) = do
-        (coin favoriteCoin ++ "/" ++ pair favoriteCoin)
-        ++ "\n"
-        ++ scannerPriceAllFavCoin favoriteCoins
+
+scannerPriceAllFavCoin :: [FavoriteCoin] -> IO ()
+scannerPriceAllFavCoin [] = return()
+scannerPriceAllFavCoin (favoriteCoin:favoriteCoins) =
+    do
+        temp <- scannerPrice (coin favoriteCoin) (pair favoriteCoin)
+        putStrLn temp
+        scannerPriceAllFavCoin favoriteCoins
+
+getBinancePrice :: String -> String -> IO String
+getBinancePrice coin pair = 
+    do 
+        r <- get ("https://api.binance.me/api/v3/ticker/price?symbol=" ++ coin ++ pair)
+        let price =  T.unpack(r ^. responseBody . key "price" . _String)
+        return price
+
+getIndodaxPrice :: String -> String -> IO String
+getIndodaxPrice coin pair = 
+    do 
+        r <- get ("https://indodax.com/api/" ++ lowerCase coin ++ "_" ++ lowerCase pair ++ "/ticker")
+        let price = T.unpack(r ^. responseBody . key "ticker".  key "last". _String)
+        return price
+
+getKucoinPrice :: String -> String -> IO String
+getKucoinPrice coin pair = 
+    do 
+        r <- get ("https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=" ++ coin ++ "-" ++ pair)
+        let price = T.unpack(r ^. responseBody . key "data" . key "price" . _String)
+        return price
+
+lowerCase :: String -> String
+lowerCase [] = []
+lowerCase (x:xs) = if x `elem` ['A'..'Z'] 
+               then chr (ord x + 32) : lowerCase xs 
+               else x : lowerCase xs  

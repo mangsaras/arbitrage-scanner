@@ -3,7 +3,7 @@ module Main where
 import System.IO (hFlush, stdout)
 import Model.Market (Market (Unknown), idMarket, marketName, apiUrl, description, showAllMarket, parseData)
 import Model.FavoriteCoin (FavoriteCoin (Unknown), idCoin, coin, pair, showAllFavoriteCoin, parseDataCoin, addNewFavCoin, saveToFileFavCoin, updateFavCoin, removeFavCoin)
-import Model.CoinPrice (CoinPrice (UnknownCoin), coinPair, price, parseCoinPrice, showAllCoinPrice, getPrice, scannerPrice, scannerPriceAllFavCoin)
+import Model.CoinPrice (CoinPrice (UnknownCoin), coinPair, price, parseCoinPrice, showAllCoinPrice, getPrice, scannerPrice, scannerPriceAllFavCoin, getBinancePrice, getIndodaxPrice, getKucoinPrice)
 import Library.Common (MaybeT, liftMaybeT, maybeReadInt, runMaybeT)
 import Text.Printf
 
@@ -102,14 +102,15 @@ scannerMenu = do
     choiceScanMenu <- prompt "Input choice: "
     case choiceScanMenu of 
         "a" -> do
-            coinPair <- prompt "Coin/Pair : "
-            tempResult <- scannerPrice coinPair
+            coin <- prompt "Coin : "
+            pair <- prompt "Pair(USDT/BUSD/USDC) : "
+            tempResult <- scannerPrice coin pair
             putStrLn tempResult
             empty <- prompt "Press enter to go back"
             scannerMenu
         "b" -> do
             favoriteCoins <- fmap parseDataCoin (readFile "app/Data/FavoriteCoin.txt")
-            putStrLn $ scannerPriceAllFavCoin favoriteCoins
+            scannerPriceAllFavCoin favoriteCoins
             empty <- prompt "Press enter to go back"
             scannerMenu
         "d" -> do
