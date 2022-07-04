@@ -110,7 +110,7 @@ scannerPrice :: String -> String -> IO String
 scannerPrice coin pair = do
     
     let coinPair = coin ++ "/" ++ pair
-    
+
     priceBinance <- getBinancePrice coin pair
     priceIndodax <- getIndodaxPrice coin pair
     priceKucoin <- getKucoinPrice coin pair
@@ -126,6 +126,10 @@ scannerPrice coin pair = do
     let diffKucoinBinance = ((binanceDouble-kucoinDouble)/kucoinDouble)*100
     let diffKucoinIndodax = ((indodaxDouble-kucoinDouble)/kucoinDouble)*100
 
+    rBuy <- checkRecomendedBuy binanceDouble indodaxDouble kucoinDouble
+    rSell <- checkRecomendedSell binanceDouble indodaxDouble kucoinDouble
+    
+
     let result = "\n========================================================="
                 ++ "\nCoin/Pair : " ++ coinPair
                 ++ ("\nBinance Price : " ++ priceBinance)
@@ -138,6 +142,8 @@ scannerPrice coin pair = do
                 ++ printf "\nIndodax -> Kucoin : %.2f%%" diffIndodaxKucoin
                 ++ printf "\nKucoin -> Binance : %.2f%%" diffKucoinBinance
                 ++ printf "\nKucoin -> Indodax : %.2f%%" diffKucoinIndodax
+                ++ "\n" ++ rBuy
+                ++ "\n" ++ rSell
                 ++ "\n========================================================="
 
     return result
@@ -178,3 +184,27 @@ lowerCase [] = []
 lowerCase (x:xs) = if x `elem` ['A'..'Z'] 
                then chr (ord x + 32) : lowerCase xs 
                else x : lowerCase xs  
+
+checkRecomendedBuy :: Double -> Double -> Double -> IO String
+checkRecomendedBuy binancePrice indodaxPrice kucoinPrice = do
+    let recomendedBuy
+            | binancePrice < indodaxPrice && binancePrice < kucoinPrice
+                = "Recomended Buy in Binance Market with price : " ++ show binancePrice
+            | indodaxPrice < binancePrice && indodaxPrice < kucoinPrice
+                = "Recomended Buy in Indodax Market with price : " ++ show indodaxPrice
+            | kucoinPrice < binancePrice && kucoinPrice < indodaxPrice
+                = "Recomended Buy in Kucoin Market with price : " ++ show kucoinPrice
+            | otherwise = ""
+    return recomendedBuy
+
+checkRecomendedSell :: Double -> Double -> Double -> IO String
+checkRecomendedSell binancePrice indodaxPrice kucoinPrice = do
+    let recomendedSell
+            | binancePrice > indodaxPrice && binancePrice > kucoinPrice
+                = "Recomended Sell in Binance Market with price : " ++ show binancePrice
+            | indodaxPrice > binancePrice && indodaxPrice > kucoinPrice
+                = "Recomended Sell in Indodax Market with price : " ++ show indodaxPrice
+            | kucoinPrice > binancePrice && kucoinPrice > indodaxPrice
+                = "Recomended Sell in Kucoin Market with price : " ++ show kucoinPrice
+            | otherwise = ""
+    return recomendedSell
